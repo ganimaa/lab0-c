@@ -87,8 +87,11 @@ element_t *q_remove_head(struct list_head *head, char *sp, size_t bufsize)
         return NULL;
     element_t *node = list_entry(head->next, element_t, list);
     list_del(head->next);
-    if (sp)
-        node->value = strdup(sp);
+    if (sp) {
+        memcpy(sp, node->value, bufsize - 1);
+        // strncpy(sp, node->value, bufsize - 1);
+        sp[bufsize - 1] = '\0';
+    }
     return node;
 }
 
@@ -99,8 +102,10 @@ element_t *q_remove_tail(struct list_head *head, char *sp, size_t bufsize)
         return NULL;
     element_t *node = list_entry(head->prev, element_t, list);
     list_del(head->prev);
-    if (sp)
-        node->value = strdup(sp);
+    if (sp) {
+        memcpy(sp, node->value, bufsize - 1);
+        sp[bufsize - 1] = '\0';
+    }
     return node;
 }
 
@@ -110,7 +115,8 @@ int q_size(struct list_head *head)
     if (!head)
         return 0;
     int size = 0;
-    for (struct list_head *ptr = head->next; ptr != head; ptr = ptr->next)
+    struct list_head *ptr;
+    list_for_each (ptr, head)
         size++;
     return size;
 }
@@ -136,6 +142,21 @@ bool q_delete_mid(struct list_head *head)
 bool q_delete_dup(struct list_head *head)
 {
     // https://leetcode.com/problems/remove-duplicates-from-sorted-list-ii/
+    if (!head || list_empty(head))
+        return false;
+    struct list_head *duplist = q_new();
+    struct list_head *node, *safe;
+    int found_dup = 0;
+    list_for_each_safe (node, safe, head) {
+        char *cur = list_entry(node, element_t, list)->value;
+        char *next = list_entry(safe, element_t, list)->value;
+        int res = (node->next != head) && !(strcmp(cur, next));
+        if (res || found_dup) {
+            list_move(node, duplist);
+            found_dup = res;
+        }
+    }
+    q_free(duplist);
     return true;
 }
 

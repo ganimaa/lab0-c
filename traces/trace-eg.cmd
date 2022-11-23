@@ -19,6 +19,8 @@ reverse
 swap
 # See how long it is
 size
+# Delete duplicate
+dedup
 # Delete queue.  Goes back to a NULL queue.
 free
 # Exit program
