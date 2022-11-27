@@ -1,8 +1,8 @@
+#include "queue.h"
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include "queue.h"
 
 /* Notice: sometimes, Cppcheck would find the potential NULL pointer bugs,
  * but some of them cannot occur. You can suppress them by adding the
@@ -88,8 +88,7 @@ element_t *q_remove_head(struct list_head *head, char *sp, size_t bufsize)
     element_t *node = list_entry(head->next, element_t, list);
     list_del(head->next);
     if (sp) {
-        memcpy(sp, node->value, bufsize - 1);
-        // strncpy(sp, node->value, bufsize - 1);
+        strncpy(sp, node->value, bufsize - 1);
         sp[bufsize - 1] = '\0';
     }
     return node;
@@ -103,7 +102,7 @@ element_t *q_remove_tail(struct list_head *head, char *sp, size_t bufsize)
     element_t *node = list_entry(head->prev, element_t, list);
     list_del(head->prev);
     if (sp) {
-        memcpy(sp, node->value, bufsize - 1);
+        strncpy(sp, node->value, bufsize - 1);
         sp[bufsize - 1] = '\0';
     }
     return node;
@@ -194,5 +193,44 @@ void q_reverse(struct list_head *head)
     }
 }
 
+struct list_head *mergesort(struct list_head *start, struct list_head *end)
+{
+    if (start == end)
+        return start;
+    struct list_head *slow = start, *fast = start;
+    while (fast->next && fast->next->next) {
+        slow = slow->next;
+        fast = fast->next->next;
+    }
+    fast = slow->next;
+    slow->next = NULL;
+    struct list_head *left = mergesort(start, slow);
+    struct list_head *right = mergesort(fast, end);
+    struct list_head *temp_head = start, **ptr = &temp_head, **node;
+    for (node = NULL; left && right; *node = (*node)->next) {
+        char *l_value = list_entry(left, element_t, list)->value;
+        char *r_value = list_entry(right, element_t, list)->value;
+        node = strcmp(l_value, r_value) < 0 ? &left : &right;
+        *ptr = *node;
+        ptr = &(*ptr)->next;
+    }
+    *ptr = (struct list_head *) ((uintptr_t) left | (uintptr_t) right);
+    return temp_head;
+}
+
 /* Sort elements of queue in ascending order */
-void q_sort(struct list_head *head) {}
+void q_sort(struct list_head *head)
+{
+    if (!head || head->next == head->prev)
+        return;
+    // break circuler linked-list
+    struct list_head *end = head->prev;
+    end->next = NULL;
+    // divide and conqure
+    head->next = mergesort(head->next, end);
+    // rebuild double linked-list
+    for (end = head; end->next != NULL; end = end->next)
+        end->next->prev = end;
+    head->prev = end;
+    end->next = head;
+}

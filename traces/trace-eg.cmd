@@ -13,10 +13,15 @@ ih gerbil
 # Now at the tail
 it meerkat
 it bear
+it RAND 5
 # Reverse it
 reverse
 # Swap it
 swap
+# Delete mid
+dm
+# Sort it
+sort
 # See how long it is
 size
 # Delete duplicate
