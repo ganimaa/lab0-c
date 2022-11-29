@@ -193,20 +193,20 @@ void q_reverse(struct list_head *head)
     }
 }
 
-struct list_head *mergesort(struct list_head *start, struct list_head *end)
+struct list_head *mergesort(struct list_head *head)
 {
-    if (start == end)
-        return start;
-    struct list_head *slow = start, *fast = start;
+    if (!head || !head->next)
+        return head;
+    struct list_head *slow = head, *fast = head;
     while (fast->next && fast->next->next) {
         slow = slow->next;
         fast = fast->next->next;
     }
     fast = slow->next;
     slow->next = NULL;
-    struct list_head *left = mergesort(start, slow);
-    struct list_head *right = mergesort(fast, end);
-    struct list_head *temp_head = start, **ptr = &temp_head, **node;
+    struct list_head *left = mergesort(head);
+    struct list_head *right = mergesort(fast);
+    struct list_head *temp_head = head, **ptr = &temp_head, **node;
     for (node = NULL; left && right; *node = (*node)->next) {
         char *l_value = list_entry(left, element_t, list)->value;
         char *r_value = list_entry(right, element_t, list)->value;
@@ -223,12 +223,11 @@ void q_sort(struct list_head *head)
 {
     if (!head || head->next == head->prev)
         return;
-    // break circuler linked-list
+    // Break circular linked-list
     struct list_head *end = head->prev;
     end->next = NULL;
-    // divide and conqure
-    head->next = mergesort(head->next, end);
-    // rebuild double linked-list
+    head->next = mergesort(head->next);
+    // Rebuild circular doubly linked-list
     for (end = head; end->next != NULL; end = end->next)
         end->next->prev = end;
     head->prev = end;
