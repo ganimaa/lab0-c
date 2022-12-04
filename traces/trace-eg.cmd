@@ -22,6 +22,8 @@ swap
 dm
 # Sort it
 sort
+# Shuffle
+shuffle
 # See how long it is
 size
 # Delete duplicate
