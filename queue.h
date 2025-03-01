@@ -6,7 +6,7 @@
  *
  * It uses a circular doubly-linked list to represent the set of queue elements
  */
-
+//
 #include <stdbool.h>
 #include <stddef.h>
 
