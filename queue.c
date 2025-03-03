@@ -7,7 +7,13 @@
 /* Create an empty queue */
 struct list_head *q_new()
 {
-    return NULL;
+    struct list_head *node =
+        (struct list_head *) malloc(sizeof(struct list_head));
+    if (!node)
+        return NULL;
+    node->next = node;
+    node->prev = node;
+    return node;
 }
 
 /* Free all storage used by queue */
