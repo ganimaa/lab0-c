@@ -200,8 +200,85 @@ void q_reverseK(struct list_head *head, int k)
     }
 }
 
+struct list_head *merge(struct list_head *left,
+                        struct list_head *right,
+                        bool descend)
+{
+    LIST_HEAD(head);
+    INIT_LIST_HEAD(&head);
+    struct list_head *node = &head;
+
+    while (left && right) {
+        const element_t *l = list_entry(left, element_t, list);
+        const element_t *r = list_entry(right, element_t, list);
+        if ((strcmp(l->value, r->value) <= 0)) {
+            if (!descend) {
+                node->next = left;
+                left->prev = node;
+                left = left->next;
+            } else {
+                node->next = right;
+                right->prev = node;
+                right = right->next;
+            }
+        } else {
+            if (!descend) {
+                node->next = right;
+                right->prev = node;
+                right = right->next;
+            } else {
+                node->next = left;
+                left->prev = node;
+                left = left->next;
+            }
+        }
+        node = node->next;
+    }
+    node->next = left ? left : right;
+
+    if (node->next)
+        node->next->prev = node;
+
+    return head.next;
+}
+
+struct list_head *merge_sort(struct list_head *head, bool descend)
+{
+    if (!head || !head->next)
+        return head;
+
+    struct list_head *slow = head, *fast = head->next;
+    while (fast && fast->next) {
+        slow = slow->next;
+        fast = fast->next->next;
+    }
+    struct list_head *mid = slow->next;
+
+    slow->next = NULL;
+    struct list_head *left = merge_sort(head, descend);
+    struct list_head *right = merge_sort(mid, descend);
+    return merge(left, right, descend);
+}
+
 /* Sort elements of queue in ascending/descending order */
-void q_sort(struct list_head *head, bool descend) {}
+void q_sort(struct list_head *head, bool descend)
+{
+    if (!head || list_empty(head) || list_is_singular(head))
+        return;
+
+    struct list_head *start = head->next, *end = head->prev;
+    start->prev = NULL;
+    end->next = NULL;
+
+    struct list_head *after_sort = merge_sort(start, descend);
+    head->next = after_sort;
+    after_sort->prev = head;
+    end = after_sort;
+    while (end->next)
+        end = end->next;
+    end->next = head;
+    head->prev = end;
+}
 
 /* Remove every node which has a node with a strictly less value anywhere to
  * the right side of it */

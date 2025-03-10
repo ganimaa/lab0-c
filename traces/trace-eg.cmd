@@ -19,5 +19,11 @@ reverse
 size
 # Delete queue.  Goes back to a NULL queue.
 free
+
+# sort test
+new
+ih RAND 10
+sort
+
 # Exit program
 quit
