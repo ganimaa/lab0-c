@@ -157,11 +157,12 @@ void q_swap(struct list_head *head)
     // https://leetcode.com/problems/swap-nodes-in-pairs/
     if (!head || list_empty(head))
         return;
-    struct list_head *node = head->next;
-    while (node && node->next != head) {
+    struct list_head *cur = head->next, *node = cur->next;
+    while (cur != head && cur->next != head) {
         list_del(node);
-        list_add(node, node->next);
-        node = node->next;
+        list_add(node, cur->prev);
+        cur = cur->next;
+        node = cur->next;
     }
 }
 
