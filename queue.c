@@ -341,12 +341,12 @@ int q_merge(struct list_head *head, bool descend)
     if (!head || list_empty(head))
         return 0;
     queue_contex_t *new_head = list_entry(head->next, queue_contex_t, chain);
-    struct list_head *node = head->next, *safe = NULL;
-    while (node != head) {
-        safe = node->next;
+    struct list_head *node = head->next->next, *safe = node->next;
+    while (node && node != head) {
         queue_contex_t *tmp = list_entry(node, queue_contex_t, chain);
-        list_splice(tmp->q, new_head->q);
+        list_splice_tail_init(tmp->q, new_head->q);
         node = safe;
+        safe = node->next;
     }
     q_sort(new_head->q, descend);
     return q_size(new_head->q);
